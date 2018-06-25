@@ -1,0 +1,139 @@
+https://www.datenreise.de/raspberry-pi-inbetriebnahme-howto/
+https://www.pyimagesearch.com/2016/04/18/install-guide-raspberry-pi-3-raspbian-jessie-opencv-3/
+
+
+Raspbian Stretch with desktop
+Image with desktop based on Debian Stretch
+Version: April 2018
+Release date: 2018-04-18
+Kernel version: 4.14
+https://downloads.raspberrypi.org/raspbian_latest
+
+Mit Win32DiskImager auf SD Card spielen.
+
+sudo raspi-config
+
+Localisation Options
+
+I1 Change Locale
+Das Tastaturlayout ist nach der Installation standardmäßig auf „UK“ eingestellt. Über den Punkt Change Locale lässt sich der Zeichensatz und die Sprache des Systems festlegen. Für ein deutsches System wählen wir de_DE.UTF-8 aus und bestätigen mit OK. Im nächsten Dialog müssen wir de_DE.UTF-8 noch als Standardeinstellung wählen und nochmals bestätigen.
+
+I2 Change Timezone
+Die Uhrzeit des Raspberry Pis ist in der Grundeinstellung auf die UK Zeit eingestellt. Um die Zeitzone entsprechend anzupassen wählen wir zunächst „Europe“ und danach „Berlin“ aus.
+Change User Password
+
+Da Raspbian mit einem Standardpasswort daherkommt, sollte man das Passwort für den Benutzernamen „pi“ ändern.
+Hinweis: Das Tastaturlayout ist standardmäßig auf „UK“ eingestellt. Daher sollte dieser Schritt erst ausgeführt werden, nachdem das Tastaturlayout umgestellt wurde. Andernfalls müssen Z und Y bei der Eingabe vertauscht werden.
+Hostname
+
+Möchte man dem Raspberry Pi einen individuellen Hostname geben, kann man dies unter diesem Menüpunkt machen.
+Boot Options
+
+P2 SSH
+Um auf den Raspberry Pi per SSH aus der Ferne zugreifen zu können, muss der SSH-Serverdienst aktiviert sein. Dies kann über diesen Punkt aktiviert oder deaktiviert werden.
+Advanced Options
+
+A1 Expand Filesystem
+Das Raspbian-Image wurde für eine 2 GB große Speicherkarte konzipiert, daher wird bei einer größeren SD-Karte der Speicherplatz nicht voll ausgenutzt. Um den übrigen Platz auf der Karte nutzen zu können, müssen wir die Root-Partition vergrößern. Dieser Menüpunkt in raspi-config nimmt uns die Arbeit ab und erweitert die Systempartition entsprechend. Die Änderung greift dann beim nächsten Bootvorgang.
+
+sudo apt-get update
+sudo apt-get dist-upgrade
+
+
+Benutzername: pi
+Passwort: raspberry 
+
+df -h
+Speicherplatz anzeigen
+ 	
+sudo apt-get purge wolfram-engine
+
+knapp über 700MB freigeben
+
+ 	
+sudo apt-get install build-essential cmake pkg-config
+sudo apt-get install libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev
+sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
+sudo apt-get install libxvidcore-dev libx264-dev
+sudo apt-get install libgtk2.0-dev
+ 	
+sudo apt-get install libatlas-base-dev gfortran
+sudo apt-get install python2.7-dev python3-dev
+
+sudo apt autoremove 
+
+bringt 20MB speicherplatz
+
+cd ~
+wget -O opencv.zip https://github.com/Itseez/opencv/archive/3.4.1.zip
+unzip opencv.zip
+
+wget -O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.4.1.zip
+unzip opencv_contrib.zip
+
+wget https://bootstrap.pypa.io/get-pip.py
+sudo python get-pip.py
+
+sudo pip install virtualenv virtualenvwrapper
+sudo rm -rf ~/.cache/pip
+
+echo -e "\n# virtualenv and virtualenvwrapper" >> ~/.profile
+echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.profile
+echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.profile
+
+source ~/.profile
+
+mkvirtualenv cv3.4.1 -p python3
+
+source ~/.profile
+workon cv3.4.1
+
+pip install numpy
+
+workon cv3.4.1
+
+cd ~/opencv-3.4.1/
+mkdir build
+cd build
+
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D ENABLE_PRECOMPILED_HEADERS=OFF \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D INSTALL_PYTHON_EXAMPLES=ON \
+    -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.4.1/modules \
+    -D BUILD_EXAMPLES=ON ..
+
+make -j4
+
+make
+
+da mit allen 4 kernen der Raspberry sich aufhängt...
+
+sudo make install
+sudo ldconfig
+
+ls -l /usr/local/lib/python3.5/site-packages/
+
+
+cd /usr/local/lib/python3.5/site-packages/
+
+sudo mv cv2.cpython-35m-arm-linux-gnueabihf.so cv2.so
+
+cd ~/.virtualenvs/cv3.4.1/lib/python3.5/site-packages/
+
+ln -s /usr/local/lib/python3.5/site-packages/cv2.so cv2.so
+
+rm -rf opencv-3.4.1 opencv_contrib-3.4.1
+
+
+
+source ~/.profile
+workon cv
+python
+
+import cv2
+cv2.__version__
+
+
+
+
